@@ -8,7 +8,7 @@ st.set_page_config(layout="wide")
 
 
 # --- Load slides ---
-slides_dir = Path("Visualisation\slide")
+slides_dir = slides_dir = Path("Visualisation/slide")
 slides = sorted([p for p in slides_dir.iterdir()
                  if p.suffix.lower() in [".png", ".jpg", ".jpeg", ".webp"]])
 
@@ -83,7 +83,7 @@ with st.container():
 
 
 
-st.title("Cahier des charges — Suivi du comportement consommateur & optimisation de la stratégie prix")
+st.title("Cahier des charges — ML pricing optimization")
 
 st.markdown("""
 <style>
@@ -141,18 +141,17 @@ Mettre à disposition un outil de pilotage permettant :
 </div>
 <div class="text-block dashlist">
 <ul>
-  <li>Produire une prévision de la demande avec un horizon de 3 mois.</li>
-  <li>Permettre la comparaison entre réalisé et prévu.</li>
+  <li>Produire une prévision de la demande avec un horizon de 21 jours.</li>
 </ul>
 </div>
 
 <div class="text-block">
-<b>Suivi de l’élasticité prix</b><br>
+<b>Suivi des KPI de pricing optimization</b><br>
 </div>
 <div class="text-block dashlist">
 <ul>
-  <li>Estimer et visualiser l’évolution de l’élasticité prix dans le temps.</li>
-  <li>Décliner l’analyse par catégorie produit (et éventuellement par sous-catégorie si disponible).</li>
+  <li>Visualiser l’évolution de l’élasticité prix dans le temps avec des aggrégations.</li>
+  <li>Visualiser l’évolution du Basket intensity proxy dans le temps avec des aggrégations.</li>
 </ul>
 </div>
 """, unsafe_allow_html=True)
@@ -160,11 +159,11 @@ Mettre à disposition un outil de pilotage permettant :
 st.markdown("""
 <div class="section-title">2) Livrables attendus</div>
 <div class="text-block">
-Un dashboard contenant au minimum 2 graphiques :
+Un dashboard contenant au minimum 3 graphiques :
 </div>
 <div class="text-block dashlist">
 <ul>
-  <li><b>Graphique 1 — Prévision de la demande</b>
+  <li><b>Graphique 1 — Demand Forecasting</b>
     <ul>
       <li>Série temporelle : demande historique + prévision sur 3 mois.</li>
       <li>Affichage avec intervalle de confiance (si modèle le permet).</li>
@@ -184,7 +183,7 @@ st.markdown("""
 <div class="section-title">3) Contraintes métier</div>
 <div class="text-block dashlist">
 <ul>
-  <li>Horizon de prévision obligatoire : 3 mois</li>
+  <li>Horizon de prévision obligatoire : 21 jours</li>
   <li>Les visualisations et calculs doivent se mettre à jour chaque mois à partir des nouvelles données disponibles.</li>
 </ul>
 </div>
@@ -197,7 +196,7 @@ Le livrable est validé si :
 </div>
 <div class="text-block dashlist">
 <ul>
-  <li>la prévision affiche bien un horizon 3 mois</li>
+  <li>la prévision affiche bien un horizon 21 jours</li>
   <li>les deux graphiques sont présents et lisibles</li>
   <li>le dashboard se met à jour mensuellement avec les nouvelles données</li>
   <li>l’élasticité est consultable par catégorie produit</li>
