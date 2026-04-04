@@ -108,13 +108,13 @@ st.markdown("""
 
 # Chargement des visualisations 
 
-img_dist_qte  = Image.open("Notebook/graphique/EDA/repartition_qte.png")
-img_dist_prix = Image.open("Notebook/graphique/EDA/repartition prix.png")
-img_dist_cat  = Image.open("Notebook/graphique/EDA/repartition des produits par categories.png")
-img_corr      = Image.open("Notebook/graphique/EDA/correlation prix qte.png")
-img_evol_prix = Image.open("Notebook/graphique/EDA/evol prix.png")
-img_evol_qte  = Image.open("Notebook/graphique/EDA/evol qte.png")
-img_qq        = Image.open("Notebook/graphique/EDA/qqplot.png")
+img_dist_qte  = Image.open("graphique/EDA/Distribution_qty.png")
+img_dist_prix = Image.open("graphique/EDA/Distribution_price.png")
+img_dist_cat  = Image.open("graphique/EDA/Distribution_category.png")
+img_corr      = Image.open("graphique/EDA/scatter.png")
+img_evol_prix = Image.open("graphique/EDA/trend_price.png")
+img_evol_qte  = Image.open("graphique/EDA/trend_qty.png")
+img_qq        = Image.open("graphique/EDA/QQ_plot.png")
 # Modification de la taille des visualisations 
 
 def taille_img(img):
