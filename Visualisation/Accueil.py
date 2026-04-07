@@ -1,206 +1,287 @@
-import streamlit as st
 from pathlib import Path
 
-st.title("Présentation du projet et cahier des charges")
-st.title("Le projet résumé en slide")
+import streamlit as st
 
-st.set_page_config(layout="wide")
+# ============================================================
+# PAGE CONFIG
+# ============================================================
+st.set_page_config(
+    page_title="Project Presentation and Requirements Specification",
+    layout="wide",
+    initial_sidebar_state="collapsed"
+)
+
+# ============================================================
+# GLOBAL STYLE
+# ============================================================
+st.markdown("""
+<style>
+.stApp {
+    background:
+        radial-gradient(circle at top left, rgba(59,130,246,0.08), transparent 28%),
+        radial-gradient(circle at top right, rgba(99,102,241,0.08), transparent 24%),
+        linear-gradient(180deg, #f8fbff 0%, #f6f8fc 45%, #f8fafc 100%);
+}
+
+.main .block-container {
+    max-width: 1280px;
+    padding-top: 1.5rem;
+    padding-bottom: 3rem;
+}
+
+h1, h2, h3 {
+    color: #0f172a;
+    letter-spacing: -0.02em;
+}
+
+.hero-box {
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 55%, #2563eb 100%);
+    color: white;
+    border-radius: 24px;
+    padding: 1.6rem 1.6rem 1.4rem 1.6rem;
+    box-shadow: 0 18px 45px rgba(30, 58, 138, 0.22);
+    margin-bottom: 1.2rem;
+}
+
+.section-box {
+    background: rgba(255,255,255,0.90);
+    border: 1px solid rgba(226,232,240,0.95);
+    border-radius: 18px;
+    padding: 1rem 1.1rem;
+    box-shadow: 0 8px 24px rgba(15,23,42,0.05);
+    margin-bottom: 1rem;
+}
+
+.slide-frame {
+    background: rgba(255,255,255,0.94);
+    border: 1px solid rgba(226,232,240,0.95);
+    border-radius: 18px;
+    padding: 1rem;
+    box-shadow: 0 8px 24px rgba(15,23,42,0.05);
+    margin-top: 0.8rem;
+}
+
+.badge {
+    display: inline-block;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    margin: 0.15rem 0.2rem 0.15rem 0;
+    font-size: 0.88rem;
+    font-weight: 600;
+    background: #eef2ff;
+    color: #3730a3;
+    border: 1px solid #c7d2fe;
+}
+
+[data-testid="stImage"] img {
+    border-radius: 18px;
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+}
+
+div[data-testid="stExpander"] {
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid rgba(191, 219, 254, 0.9);
+}
+
+[data-testid="stButton"] button {
+    font-weight: 600;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# ============================================================
+# HELPERS
+# ============================================================
+def hero(title: str, subtitle: str) -> None:
+    st.markdown(f"""
+    <div class="hero-box">
+        <div style="font-size:0.8rem;font-weight:800;letter-spacing:0.10em;text-transform:uppercase;opacity:0.82;margin-bottom:0.4rem;">
+            Retail Demand Forecasting
+        </div>
+        <div style="font-size:2.15rem;font-weight:800;line-height:1.08;margin-bottom:0.55rem;">
+            {title}
+        </div>
+        <div style="font-size:1rem;line-height:1.72;opacity:0.92;max-width:980px;">
+            {subtitle}
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
 
-# --- Load slides ---
-slides_dir = slides_dir = Path("Visualisation/slide")
-slides = sorted([p for p in slides_dir.iterdir()
-                 if p.suffix.lower() in [".png", ".jpg", ".jpeg", ".webp"]])
+def section_banner(index: str, title: str, description: str) -> None:
+    st.markdown(f"""
+    <div class="section-box">
+        <div style="font-size:0.8rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:#2563eb;margin-bottom:0.25rem;">
+            Section {index}
+        </div>
+        <div style="font-size:1.35rem;font-weight:800;color:#0f172a;margin-bottom:0.35rem;">
+            {title}
+        </div>
+        <div style="color:#475569;line-height:1.7;">
+            {description}
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
-# --- State ---
+
+def text_box(title: str, body_md: str) -> None:
+    with st.container(border=True):
+        st.markdown(f"**{title}**")
+        st.markdown(body_md)
+
+
+def badge(label: str, value: str) -> None:
+    st.markdown(
+        f'<span class="badge">{label}: {value}</span>',
+        unsafe_allow_html=True
+    )
+
+
+# ============================================================
+# LOAD SLIDES
+# ============================================================
+slides_dir = Path("Visualisation/slide")
+slides = []
+
+if slides_dir.exists():
+    slides = sorted([
+        p for p in slides_dir.iterdir()
+        if p.suffix.lower() in [".png", ".jpg", ".jpeg", ".webp"]
+    ])
+
+# ============================================================
+# STATE
+# ============================================================
 if "slide_idx" not in st.session_state:
     st.session_state.slide_idx = 0
 
 n = len(slides)
 
-# --- Controls row ---
-c1, c2, c3, c4 = st.columns([1.2, 2.5, 1.2, 2.5])
-
-with c1:
-    if st.button("⬅️ Précédent", use_container_width=True):
-        st.session_state.slide_idx = (st.session_state.slide_idx - 1) % n
-
-with c2:
-    st.markdown(
-        f"<div style='text-align:center; font-weight:700; font-size:16px;'>"
-        f"Slide {st.session_state.slide_idx + 1} / {n}"
-        f"</div>",
-        unsafe_allow_html=True
-    )
-
-with c3:
-    if st.button("Suivant ➡️", use_container_width=True):
-        st.session_state.slide_idx = (st.session_state.slide_idx + 1) % n
-
-with c4:
-    # Navigation directe
-    new_idx = st.selectbox(
-        "Aller à",
-        options=list(range(n)),
-        format_func=lambda i: f"{i+1} — {slides[i].stem}",
-        index=st.session_state.slide_idx,
-        label_visibility="collapsed",
-    )
-    st.session_state.slide_idx = new_idx
-
-# --- Frame style ---
-st.markdown(
-    """
-    <style>
-    .slide-frame {
-        border: 1px solid rgba(120,120,120,0.35);
-        border-radius: 18px;
-        padding: 14px;
-        box-shadow: 0 6px 18px rgba(0,0,0,0.06);
-        background: rgba(255,255,255,0.02);
-        margin-top: 10px;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
+# ============================================================
+# HEADER
+# ============================================================
+hero(
+    "Project Presentation and Requirements Specification",
+    "This page presents the project in slide format and summarizes the functional requirements of the pricing optimization dashboard."
 )
 
-# --- Display slide inside a "frame" ---
-with st.container():
-    st.markdown("<div class='slide-frame'>", unsafe_allow_html=True)
+# ============================================================
+# 1. PROJECT SLIDES
+# ============================================================
+section_banner(
+    "01",
+    "Project overview in slides",
+    "Visual navigation through the project presentation slides and its functional scope."
+)
 
-    # centrage horizontal
-    col1, col2, col3 = st.columns([1,3,1])
+if n == 0:
+    st.warning(f"No slides found in the folder: {slides_dir}")
+    text_box(
+        "Verification",
+        """
+Check the following points:
 
-    with col2:
-        st.image(
-            str(slides[st.session_state.slide_idx]),
-            width=700
-        )
-        st.caption(f"Fichier : {slides[st.session_state.slide_idx].name}")
+- the `Visualisation/slide` folder exists
+- it contains `.png`, `.jpg`, `.jpeg` or `.webp` images
+- the application is launched from the correct project root
+"""
+    )
+else:
+    st.markdown("### Navigation")
+    badge("Number of slides", str(n))
+    badge("Folder", str(slides_dir))
+
+    c1, c2, c3 = st.columns([1.2, 2.2, 1.2])
+
+    with c1:
+        if st.button("⬅️ Previous", use_container_width=True):
+            st.session_state.slide_idx = (st.session_state.slide_idx - 1) % n
+
+    with c2:
+        current_label = f"Slide {st.session_state.slide_idx + 1} / {n}"
+        with st.container(border=True):
+            st.markdown(f"**{current_label}**")
+
+    with c3:
+        if st.button("Next ➡️", use_container_width=True):
+            st.session_state.slide_idx = (st.session_state.slide_idx + 1) % n
+
+    st.markdown('<div class="slide-frame">', unsafe_allow_html=True)
+    col_left, col_center, col_right = st.columns([1, 3, 1])
+
+    with col_center:
+        current_slide = slides[st.session_state.slide_idx]
+        st.image(str(current_slide), use_container_width=True)
+        st.caption(f"File: {current_slide.name}")
 
     st.markdown("</div>", unsafe_allow_html=True)
 
+# ============================================================
+# 2. REQUIREMENTS
+# ============================================================
+section_banner(
+    "02",
+    "Requirements — ML pricing optimization",
+    "Summary of objectives, expected deliverables, business constraints, and acceptance criteria."
+)
 
+text_box(
+    "1) Objectives",
+    """
+**Main objective:**
 
-st.title("Cahier des charges — ML pricing optimization")
+Provide a decision-support tool enabling:
 
-st.markdown("""
-<style>
-.main-title {
-    font-size: 40px;
-    font-weight: 700;
-    margin-bottom: 10px;
-}
-.section-title {
-    font-size: 26px;
-    font-weight: 600;
-    margin-top: 34px;
-    margin-bottom: 10px;
-}
-.text-block {
-    font-size: 16px;
-    line-height: 1.6;
-}
+- short-term demand forecasting
+- monitoring consumer price sensitivity (elasticity) by product category
 
-.dashlist ul{
-    list-style: none ;
-    margin: 0 ;
-    padding-left: 0 ;
-}
-.dashlist ul ul{
-    margin-left: 26px ;
-    margin-top: 6px ;
-}
-.dashlist li{
-    margin: 6px 0 ;
-}
-.dashlist li::before{
-    content: "- " ;
-}
-</style>
-""", unsafe_allow_html=True)
+**Operational objectives:**
 
+**Demand forecasting**
 
-st.markdown("""
-<div class="section-title">1) Objectifs</div>
-<div class="text-block">
-<b>Objectif principal :</b><br>
-Mettre à disposition un outil de pilotage permettant :
-</div>
-<div class="text-block dashlist">
-<ul>
-  <li>d’anticiper la demande à court terme,</li>
-  <li>de suivre la sensibilité des consommateurs au prix (élasticité) par catégorie produit.</li>
-</ul>
-</div>
+- Produce demand forecasts with a **21-day horizon**
 
-<div class="text-block">
-<b>Objectifs opérationnels :</b><br><br>
-<b>Prévision de la demande</b><br>
-</div>
-<div class="text-block dashlist">
-<ul>
-  <li>Produire une prévision de la demande avec un horizon de 21 jours.</li>
-</ul>
-</div>
+**Pricing optimization KPIs monitoring**
 
-<div class="text-block">
-<b>Suivi des KPI de pricing optimization</b><br>
-</div>
-<div class="text-block dashlist">
-<ul>
-  <li>Visualiser l’évolution de l’élasticité prix dans le temps avec des aggrégations.</li>
-  <li>Visualiser l’évolution du Basket intensity proxy dans le temps avec des aggrégations.</li>
-</ul>
-</div>
-""", unsafe_allow_html=True)
+- Visualize price elasticity evolution over time with aggregations
+- Visualize basket intensity proxy evolution over time with aggregations
+"""
+)
 
-st.markdown("""
-<div class="section-title">2) Livrables attendus</div>
-<div class="text-block">
-Un dashboard contenant au minimum 3 graphiques :
-</div>
-<div class="text-block dashlist">
-<ul>
-  <li><b>Graphique 1 — Demand Forecasting</b>
-    <ul>
-      <li>Série temporelle : demande historique + prévision sur 3 mois.</li>
-      <li>Affichage avec intervalle de confiance (si modèle le permet).</li>
-    </ul>
-  </li>
-  <li><b>Graphique 2 — Évolution de l’élasticité prix</b>
-    <ul>
-      <li>Courbe d’élasticité dans le temps.</li>
-      <li>Filtre / segmentation par catégorie produit.</li>
-    </ul>
-  </li>
-</ul>
-</div>
-""", unsafe_allow_html=True)
+text_box(
+    "2) Expected deliverables",
+    """
+A dashboard containing at least 3 charts:
 
-st.markdown("""
-<div class="section-title">3) Contraintes métier</div>
-<div class="text-block dashlist">
-<ul>
-  <li>Horizon de prévision obligatoire : 21 jours</li>
-  <li>Les visualisations et calculs doivent se mettre à jour chaque mois à partir des nouvelles données disponibles.</li>
-</ul>
-</div>
-""", unsafe_allow_html=True)
+- **Chart 1 — Demand Forecasting**
+    - Time series: historical demand + 3-month forecast
+    - Display confidence intervals if supported by the model
 
-st.markdown("""
-<div class="section-title">4) Critères d’acceptation</div>
-<div class="text-block">
-Le livrable est validé si :
-</div>
-<div class="text-block dashlist">
-<ul>
-  <li>la prévision affiche bien un horizon 21 jours</li>
-  <li>les deux graphiques sont présents et lisibles</li>
-  <li>le dashboard se met à jour mensuellement avec les nouvelles données</li>
-  <li>l’élasticité est consultable par catégorie produit</li>
-  <li>les résultats sont cohérents (pas de valeurs aberrantes non expliquées, courbes exploitables)</li>
-</ul>
-</div>
-""", unsafe_allow_html=True)
+- **Chart 2 — Price elasticity evolution**
+    - Elasticity curve over time
+    - Filter or segmentation by product category
+"""
+)
+
+text_box(
+    "3) Business constraints",
+    """
+- Mandatory forecast horizon: **21 days**
+- Visualizations and calculations must be updated monthly using new available data
+"""
+)
+
+text_box(
+    "4) Acceptance criteria",
+    """
+The deliverable is validated if:
+
+- the forecast correctly displays a **21-day horizon**
+- both charts are present and readable
+- the dashboard updates monthly with new data
+- elasticity is available by product category
+- results are consistent, without unexplained outliers, and produce actionable curves
+"""
+)

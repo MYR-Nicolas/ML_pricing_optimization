@@ -9,24 +9,126 @@ import requests
 import streamlit as st
 
 
-# ====================
-# Page configuration
-# ====================
-st.set_page_config(page_title="Retail ML Dashboard", layout="wide")
+# ============================================================
+# PAGE CONFIG
+# ============================================================
+st.set_page_config(
+    page_title="Retail ML Dashboard",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 
+# ============================================================
+# GLOBAL STYLE
+# ============================================================
+st.markdown("""
+<style>
+.stApp {
+    background:
+        radial-gradient(circle at top left, rgba(59,130,246,0.08), transparent 28%),
+        radial-gradient(circle at top right, rgba(99,102,241,0.08), transparent 24%),
+        linear-gradient(180deg, #f8fbff 0%, #f6f8fc 45%, #f8fafc 100%);
+}
+
+.main .block-container {
+    max-width: 1340px;
+    padding-top: 1.4rem;
+    padding-bottom: 3rem;
+}
+
+h1, h2, h3 {
+    color: #0f172a;
+    letter-spacing: -0.02em;
+}
+
+[data-testid="stMetric"] {
+    background: rgba(255,255,255,0.94);
+    border: 1px solid rgba(226,232,240,0.95);
+    border-radius: 16px;
+    padding: 0.8rem 0.9rem;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
+}
+
+div[data-testid="stExpander"] {
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid rgba(191, 219, 254, 0.9);
+}
+
+[data-testid="stFileUploader"] {
+    background: rgba(255,255,255,0.78);
+    border-radius: 16px;
+    padding: 0.5rem;
+}
+
+.hero-box {
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 55%, #2563eb 100%);
+    color: white;
+    border-radius: 24px;
+    padding: 1.6rem 1.6rem 1.4rem 1.6rem;
+    box-shadow: 0 18px 45px rgba(30, 58, 138, 0.22);
+    margin-bottom: 1.2rem;
+}
+
+.section-box {
+    background: rgba(255,255,255,0.90);
+    border: 1px solid rgba(226,232,240,0.95);
+    border-radius: 18px;
+    padding: 1rem 1.1rem;
+    box-shadow: 0 8px 24px rgba(15,23,42,0.05);
+    margin-bottom: 1rem;
+}
+
+.badge {
+    display: inline-block;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    margin: 0.15rem 0.2rem 0.15rem 0;
+    font-size: 0.88rem;
+    font-weight: 600;
+    background: #eef2ff;
+    color: #3730a3;
+    border: 1px solid #c7d2fe;
+}
+
+.badge-success {
+    background: #ecfdf5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+}
+
+.badge-warning {
+    background: #fff7ed;
+    color: #9a3412;
+    border: 1px solid #fdba74;
+}
+
+.badge-info {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+}
+
+section[data-testid="stSidebar"] {
+    background: linear-gradient(180deg, #f8fbff 0%, #f4f7fb 100%);
+    border-right: 1px solid rgba(226,232,240,0.9);
+}
+</style>
+""", unsafe_allow_html=True)
+
+# ============================================================
+# CONSTANTS
+# ============================================================
 API_URL = "http://127.0.0.1:8000/api"
 API_URL_HEALTH = "http://127.0.0.1:8000/api/health"
 
-# Demo CSV files used when the API is offline or no file is uploaded.
 BASE_DIR = Path(__file__).resolve().parents[2]
-
 LOCAL_PREDICTION_CSV_PATH = BASE_DIR / "st_demo" / "predictions_globales.csv"
 LOCAL_KPI_CSV_PATH = BASE_DIR / "st_demo" / "kpi_3_last_month_quantity_Daily.csv"
 
-
-# ====================
-# Session state
-# ====================
+# ============================================================
+# SESSION STATE
+# ============================================================
 if "df" not in st.session_state:
     st.session_state.df = None
 
@@ -45,20 +147,77 @@ if "prediction_source" not in st.session_state:
 if "kpi_source" not in st.session_state:
     st.session_state.kpi_source = None
 
+# ============================================================
+# UI HELPERS
+# ============================================================
+def hero(title: str, subtitle: str) -> None:
+    st.markdown(f"""
+    <div class="hero-box">
+        <div style="font-size:0.8rem;font-weight:800;letter-spacing:0.10em;text-transform:uppercase;opacity:0.82;margin-bottom:0.4rem;">
+            Retail Demand Forecasting
+        </div>
+        <div style="font-size:2.15rem;font-weight:800;line-height:1.08;margin-bottom:0.55rem;">
+            {title}
+        </div>
+        <div style="font-size:1rem;line-height:1.72;opacity:0.92;max-width:980px;">
+            {subtitle}
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
-# ====================
-# Functions
-# ====================
+
+def section_banner(index: str, title: str, description: str) -> None:
+    st.markdown(f"""
+    <div class="section-box">
+        <div style="font-size:0.8rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:#2563eb;margin-bottom:0.25rem;">
+            Section {index}
+        </div>
+        <div style="font-size:1.35rem;font-weight:800;color:#0f172a;margin-bottom:0.35rem;">
+            {title}
+        </div>
+        <div style="color:#475569;line-height:1.7;">
+            {description}
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+
+def text_box(title: str, body_md: str) -> None:
+    with st.container(border=True):
+        st.markdown(f"**{title}**")
+        st.markdown(body_md)
+
+
+def summary_box(title: str, body_md: str) -> None:
+    with st.container(border=True):
+        st.caption(title.upper())
+        st.markdown(body_md)
+
+
+def badge(label: str, value: str, tone: str = "info") -> None:
+    tone_class = {
+        "info": "badge-info",
+        "success": "badge-success",
+        "warning": "badge-warning"
+    }.get(tone, "badge-info")
+
+    st.markdown(
+        f'<span class="badge {tone_class}">{label}: {value}</span>',
+        unsafe_allow_html=True
+    )
+
+
+def metric_row(items):
+    cols = st.columns(len(items))
+    for col, item in zip(cols, items):
+        with col:
+            st.metric(item["label"], item["value"], help=item.get("help"))
+
+
+# ============================================================
+# DATA / API FUNCTIONS
+# ============================================================
 def check_api_health(api_health_url: str, timeout: int = 5) -> tuple[bool, str]:
-    """Check whether the API health endpoint is reachable.
-
-    Args:
-        api_health_url: API health endpoint URL.
-        timeout: Request timeout in seconds.
-
-    Returns:
-        A tuple with the API status and a message.
-    """
     try:
         response = requests.get(api_health_url, timeout=timeout)
         if response.status_code == 200:
@@ -77,24 +236,8 @@ def call_api(
     endpoint: str,
     timeout: int = 120
 ) -> pd.DataFrame:
-    """Send a CSV file to the API and return the response as a DataFrame.
-
-    Args:
-        df: Input DataFrame to send.
-        api_url: Base API URL.
-        endpoint: API endpoint path.
-        timeout: Request timeout in seconds.
-
-    Returns:
-        API response converted to a DataFrame.
-
-    Raises:
-        RuntimeError: If the API returns a non-200 status code.
-        ValueError: If the response format is invalid.
-    """
     url = f"{api_url.rstrip('/')}/{endpoint.lstrip('/')}"
 
-    # Convert the input DataFrame to an in-memory CSV payload.
     csv_buffer = io.StringIO()
     df.to_csv(csv_buffer, index=False)
     csv_bytes = csv_buffer.getvalue().encode("utf-8")
@@ -128,7 +271,6 @@ def call_api(
     if df_result.empty:
         raise ValueError("API returned an empty result.")
 
-    # Normalize and sort temporal data if available.
     if "DATE" in df_result.columns:
         df_result["DATE"] = pd.to_datetime(df_result["DATE"], errors="coerce")
         df_result = df_result.dropna(subset=["DATE"])
@@ -139,20 +281,7 @@ def call_api(
     return df_result
 
 
-def load_csv_file(csv_path: str, file_label: str) -> pd.DataFrame:
-    """Load a CSV file using flexible delimiter detection.
-
-    Args:
-        csv_path: CSV file path.
-        file_label: Human-readable file label for error messages.
-
-    Returns:
-        Loaded DataFrame.
-
-    Raises:
-        FileNotFoundError: If the file does not exist.
-        ValueError: If the file is empty.
-    """
+def load_csv_file(csv_path: str | Path, file_label: str) -> pd.DataFrame:
     file_path = Path(csv_path)
 
     if not file_path.exists():
@@ -172,15 +301,7 @@ def load_csv_file(csv_path: str, file_label: str) -> pd.DataFrame:
     return df
 
 
-def load_local_prediction_csv(csv_path: str) -> pd.DataFrame:
-    """Load and validate the local prediction CSV file.
-
-    Args:
-        csv_path: Prediction CSV path.
-
-    Returns:
-        Cleaned prediction DataFrame.
-    """
+def load_local_prediction_csv(csv_path: str | Path) -> pd.DataFrame:
     df_pred = load_csv_file(csv_path, "prediction")
 
     required_cols = ["DATE", "prediction_quantity"]
@@ -200,15 +321,7 @@ def load_local_prediction_csv(csv_path: str) -> pd.DataFrame:
     return df_pred.sort_values("DATE").reset_index(drop=True)
 
 
-def load_local_kpi_csv(csv_path: str) -> pd.DataFrame:
-    """Load and validate the local KPI CSV file.
-
-    Args:
-        csv_path: KPI CSV path.
-
-    Returns:
-        Cleaned KPI DataFrame.
-    """
+def load_local_kpi_csv(csv_path: str | Path) -> pd.DataFrame:
     df_kpi = load_csv_file(csv_path, "KPI")
 
     if "DATE" not in df_kpi.columns:
@@ -221,14 +334,6 @@ def load_local_kpi_csv(csv_path: str) -> pd.DataFrame:
 
 
 def normalize_uploaded_history(df: pd.DataFrame) -> pd.DataFrame:
-    """Validate and normalize the uploaded historical dataset.
-
-    Args:
-        df: Uploaded raw DataFrame.
-
-    Returns:
-        Cleaned historical DataFrame.
-    """
     df = df.copy()
 
     required_cols = ["DATE", "SKU", "Style", "Category", "price", "quantity"]
@@ -249,14 +354,6 @@ def normalize_uploaded_history(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def get_prediction_data(df_hist: pd.DataFrame | None) -> tuple[pd.DataFrame, str]:
-    """Get prediction data from the API or fallback local CSV.
-
-    Args:
-        df_hist: Historical input DataFrame.
-
-    Returns:
-        Prediction DataFrame and source label.
-    """
     api_ok, _ = check_api_health(API_URL_HEALTH)
 
     if api_ok and df_hist is not None and not df_hist.empty:
@@ -271,14 +368,6 @@ def get_prediction_data(df_hist: pd.DataFrame | None) -> tuple[pd.DataFrame, str
 
 
 def get_kpi_data(df_hist: pd.DataFrame | None) -> tuple[pd.DataFrame, str]:
-    """Get KPI data from the API or fallback local CSV.
-
-    Args:
-        df_hist: Historical input DataFrame.
-
-    Returns:
-        KPI DataFrame and source label.
-    """
     api_ok, _ = check_api_health(API_URL_HEALTH)
 
     if api_ok and df_hist is not None and not df_hist.empty:
@@ -293,16 +382,6 @@ def get_kpi_data(df_hist: pd.DataFrame | None) -> tuple[pd.DataFrame, str]:
 
 
 def aggregate_kpi(df: pd.DataFrame, type_prdt: str, freq: str) -> pd.DataFrame:
-    """Aggregate KPI data by product level and time frequency.
-
-    Args:
-        df: KPI DataFrame.
-        type_prdt: Aggregation level.
-        freq: Resampling frequency.
-
-    Returns:
-        Aggregated KPI DataFrame.
-    """
     df = df.copy()
     df["DATE"] = pd.to_datetime(df["DATE"], errors="coerce")
     df = df.dropna(subset=["DATE"])
@@ -333,7 +412,6 @@ def aggregate_kpi(df: pd.DataFrame, type_prdt: str, freq: str) -> pd.DataFrame:
 
     out = []
 
-    # Aggregate each product group independently.
     for product_value, g in df.groupby(type_prdt, observed=True):
         if g.empty:
             continue
@@ -358,17 +436,6 @@ def aggregate_kpi(df: pd.DataFrame, type_prdt: str, freq: str) -> pd.DataFrame:
 
 
 def rank_quantity(df: pd.DataFrame, type_prdt: str, freq: str, top_n: int = 5):
-    """Rank entities by total quantity.
-
-    Args:
-        df: KPI DataFrame.
-        type_prdt: Aggregation level.
-        freq: Resampling frequency.
-        top_n: Number of top and bottom entities.
-
-    Returns:
-        Top and bottom ranked DataFrames.
-    """
     df_agg = aggregate_kpi(df, type_prdt, freq)
 
     if "quantity" not in df_agg.columns:
@@ -393,18 +460,6 @@ def prepare_rank_timeseries(
     rank_mode: str = "Highest",
     top_n: int = 5
 ):
-    """Prepare time series data for top or bottom ranked entities.
-
-    Args:
-        df: KPI DataFrame.
-        type_prdt: Aggregation level.
-        freq: Resampling frequency.
-        rank_mode: Ranking mode.
-        top_n: Number of selected entities.
-
-    Returns:
-        Plot DataFrame, top table, and bottom table.
-    """
     df_agg = aggregate_kpi(df, type_prdt, freq)
     top_5, bottom_5 = rank_quantity(df, type_prdt, freq, top_n=top_n)
 
@@ -423,18 +478,6 @@ def prepare_rank_timeseries(
 
 
 def plot_line(df, x_col, y_col, multi_lane=None, title="Dynamic Time Series"):
-    """Create a Plotly line chart.
-
-    Args:
-        df: Input DataFrame.
-        x_col: X-axis column.
-        y_col: Y-axis column.
-        multi_lane: Optional grouping column.
-        title: Chart title.
-
-    Returns:
-        Plotly figure.
-    """
     if multi_lane and multi_lane in df.columns and df[multi_lane].nunique() > 1:
         fig = px.line(df, x=x_col, y=y_col, color=multi_lane, markers=True)
     else:
@@ -459,16 +502,6 @@ def build_daily_aggregated_frame(
     value_col: str,
     include_levels: list[str]
 ) -> pd.DataFrame:
-    """Build a daily aggregated DataFrame for multiple hierarchy levels.
-
-    Args:
-        df: Input DataFrame.
-        value_col: Value column to aggregate.
-        include_levels: Additional hierarchy levels.
-
-    Returns:
-        Aggregated DataFrame with level and entity columns.
-    """
     df = df.copy()
 
     if "DATE" not in df.columns:
@@ -483,7 +516,6 @@ def build_daily_aggregated_frame(
 
     frames = []
 
-    # Create a global daily aggregation.
     general_daily = (
         df.groupby("DATE", as_index=False)[value_col]
         .sum()
@@ -492,7 +524,6 @@ def build_daily_aggregated_frame(
     )
     frames.append(general_daily)
 
-    # Create a daily aggregation for each available hierarchy level.
     for level in include_levels:
         if level in df.columns:
             tmp = (
@@ -516,17 +547,6 @@ def compute_forecast_confidence_band(
     z_score: float = 1.96,
     fallback_std_ratio: float = 0.15
 ) -> pd.DataFrame:
-    """Compute confidence intervals around forecast values.
-
-    Args:
-        hist_daily: Historical daily data.
-        pred_daily: Forecast daily data.
-        z_score: Z-score used for the interval.
-        fallback_std_ratio: Fallback ratio when no historical std is available.
-
-    Returns:
-        Forecast DataFrame with lower and upper bounds.
-    """
     pred_daily = pred_daily.copy()
     pred_daily["DATE"] = pd.to_datetime(pred_daily["DATE"], errors="coerce")
 
@@ -538,7 +558,6 @@ def compute_forecast_confidence_band(
 
     out = []
 
-    # Compute a confidence band for each level/entity pair.
     for (level_value, entity_value), pred_grp in pred_daily.groupby(
         ["level", "entity"], observed=True
     ):
@@ -585,17 +604,6 @@ def plot_forecast_with_confidence(
     selected_level: str,
     selected_entity: str
 ) -> go.Figure:
-    """Plot recent history and forecast with confidence intervals.
-
-    Args:
-        hist_daily: Historical daily data.
-        pred_daily: Forecast daily data.
-        selected_level: Selected hierarchy level.
-        selected_entity: Selected entity.
-
-    Returns:
-        Plotly figure.
-    """
     if hist_daily is not None and not hist_daily.empty:
         hist_sel = hist_daily[
             (hist_daily["level"] == selected_level) &
@@ -614,7 +622,6 @@ def plot_forecast_with_confidence(
     if hist_sel.empty and pred_sel.empty:
         raise ValueError(f"No data available for {selected_level} - {selected_entity}")
 
-    # Keep only the last 30 days of historical data.
     if not hist_sel.empty:
         max_hist_date = hist_sel["DATE"].max()
         hist_sel = hist_sel[hist_sel["DATE"] >= (max_hist_date - pd.Timedelta(days=30))]
@@ -678,18 +685,55 @@ def plot_forecast_with_confidence(
     return fig
 
 
-# ====================
-# Navigation
-# ====================
+# ============================================================
+# SIDEBAR NAVIGATION
+# ============================================================
+st.sidebar.title("Retail ML Dashboard")
 page = st.sidebar.radio("Navigation", ["Upload", "Charts"])
-st.title("Retail ML Dashboard")
 
+st.sidebar.markdown("### Quick info")
+badge_placeholder = st.sidebar.empty()
+with badge_placeholder.container():
+    if st.session_state.api_available is True:
+        st.markdown('<span class="badge badge-success">API: Available</span>', unsafe_allow_html=True)
+    elif st.session_state.api_available is False:
+        st.markdown('<span class="badge badge-warning">API: Demo mode</span>', unsafe_allow_html=True)
+    else:
+        st.markdown('<span class="badge badge-info">API: Not checked</span>', unsafe_allow_html=True)
 
-# ====================
-# Upload page
-# ====================
+# ============================================================
+# PAGE HEADER
+# ============================================================
+hero(
+    "Retail ML Dashboard",
+    "This dashboard supports retail demand forecasting workflows with file upload, API-based inference, local demo fallback, forecast visualization, and historical KPI exploration."
+)
+
+# ============================================================
+# UPLOAD PAGE
+# ============================================================
 if page == "Upload":
-    st.header("Data Upload")
+    section_banner(
+        "01",
+        "Data Upload",
+        "Upload a historical retail CSV file to drive API forecasting and KPI computation. If no file is provided, the dashboard uses local demo data."
+    )
+
+    text_box(
+        "Upload instructions",
+        """
+- Upload a CSV file containing historical retail observations.
+- Expected columns for full historical processing include:
+  - `DATE`
+  - `SKU`
+  - `Style`
+  - `Category`
+  - `price`
+  - `quantity`
+- If no file is uploaded, the app automatically switches to demo mode using local CSV outputs.
+"""
+    )
+
     uploaded_file = st.file_uploader("Choose a CSV file", type=["csv"])
 
     st.info(
@@ -712,17 +756,32 @@ if page == "Upload":
             st.session_state.kpi_source = None
 
             st.success("File loaded successfully.")
-            st.dataframe(df.head(), use_container_width=True)
+
+            metric_row([
+                {"label": "Rows", "value": f"{df.shape[0]:,}", "help": "Uploaded row count"},
+                {"label": "Columns", "value": str(df.shape[1]), "help": "Uploaded column count"},
+                {"label": "Missing values", "value": f"{int(df.isna().sum().sum()):,}", "help": "Total missing values"},
+            ])
+
+            with st.container(border=True):
+                st.markdown("**Preview of uploaded data**")
+                st.dataframe(df.head(), use_container_width=True)
+
+            with st.expander("View column names"):
+                st.write(df.columns.tolist())
 
         except Exception as e:
             st.error(f"Error while reading the file: {e}")
 
-
-# ====================
-# Charts page
-# ====================
+# ============================================================
+# CHARTS PAGE
+# ============================================================
 elif page == "Charts":
-    st.header("Analysis and Visualization")
+    section_banner(
+        "02",
+        "Analysis and Visualization",
+        "Generate forecasts, compute KPI series, and explore the outputs with interactive charts and ranked views."
+    )
 
     df_uploaded = st.session_state.df
     df_hist = None
@@ -730,6 +789,16 @@ elif page == "Charts":
     if df_uploaded is not None:
         try:
             df_hist = normalize_uploaded_history(df_uploaded)
+            summary_box(
+                "Historical input status",
+                """
+A valid uploaded historical dataset was detected and normalized successfully.
+
+The dashboard can therefore use:
+- the uploaded data as API input
+- historical quantity values for forecast comparison
+"""
+            )
         except Exception as e:
             st.warning(f"Upload detected but unusable as history: {e}")
             df_hist = None
@@ -737,9 +806,10 @@ elif page == "Charts":
         st.info("No file uploaded. Demo mode with local CSV files.")
 
     st.subheader("API Services")
-    col1, col2, col3 = st.columns(3)
 
-    with col1:
+    c1, c2, c3 = st.columns(3)
+
+    with c1:
         if st.button("Check API", use_container_width=True):
             api_ok, msg = check_api_health(API_URL_HEALTH)
             st.session_state.api_available = api_ok
@@ -750,7 +820,7 @@ elif page == "Charts":
                     f"{msg}\n\nDemo mode enabled: the dashboard will use local CSV files."
                 )
 
-    with col2:
+    with c2:
         if st.button("Generate Forecasts", use_container_width=True):
             try:
                 df_pred, source = get_prediction_data(df_hist)
@@ -765,7 +835,7 @@ elif page == "Charts":
             except Exception as e:
                 st.error(f"Forecast error: {e}")
 
-    with col3:
+    with c3:
         if st.button("Compute Historical KPI", use_container_width=True):
             try:
                 df_kpi, source = get_kpi_data(df_hist)
@@ -780,7 +850,6 @@ elif page == "Charts":
             except Exception as e:
                 st.error(f"KPI error: {e}")
 
-    # Auto-load predictions if not already loaded.
     if st.session_state.df_pred is None:
         try:
             df_pred, source = get_prediction_data(df_hist)
@@ -789,7 +858,6 @@ elif page == "Charts":
         except Exception as e:
             st.warning(f"Forecasts unavailable: {e}")
 
-    # Auto-load KPI if not already loaded.
     if st.session_state.df_kpi is None:
         try:
             df_kpi, source = get_kpi_data(df_hist)
@@ -798,16 +866,21 @@ elif page == "Charts":
         except Exception as e:
             st.warning(f"KPI unavailable: {e}")
 
-    # ====================
-    # Forecast section
-    # ====================
+    # ========================================================
+    # FORECAST SECTION
+    # ========================================================
     if st.session_state.df_pred is not None:
         df_pred = st.session_state.df_pred.copy()
 
-        st.subheader("Historical Data + Forecast Visualization")
+        section_banner(
+            "03",
+            "Forecast Visualization",
+            "Compare recent historical quantities against forecasted quantities and inspect confidence intervals by hierarchy level."
+        )
 
         if st.session_state.prediction_source is not None:
-            st.caption(f"Forecast source: {st.session_state.prediction_source}")
+            source_tone = "success" if st.session_state.prediction_source == "API" else "warning"
+            badge("Forecast source", st.session_state.prediction_source, tone=source_tone)
 
         try:
             hist_daily = None
@@ -834,9 +907,9 @@ elif page == "Charts":
             if not level_options:
                 raise ValueError("No level available in forecast data.")
 
-            c_level, c_entity = st.columns(2)
+            f1, f2 = st.columns(2)
 
-            with c_level:
+            with f1:
                 selected_level = st.selectbox(
                     "Visualization level",
                     level_options,
@@ -859,7 +932,7 @@ elif page == "Charts":
             if selected_level == "GENERAL" and "GENERAL" in entity_list:
                 default_entity_index = entity_list.index("GENERAL")
 
-            with c_entity:
+            with f2:
                 selected_entity = st.selectbox(
                     "Selected value",
                     entity_list,
@@ -885,16 +958,21 @@ elif page == "Charts":
         except Exception as e:
             st.error(f"Forecast visualization error: {e}")
 
-    # ====================
-    # Historical KPI section
-    # ====================
+    # ========================================================
+    # KPI SECTION
+    # ========================================================
     if st.session_state.df_kpi is not None:
         df_kpi = st.session_state.df_kpi.copy()
 
-        st.subheader("Historical KPI")
+        section_banner(
+            "04",
+            "Historical KPI",
+            "Explore quantity, rolling elasticity, elasticity variance, and basket intensity over different product hierarchies and frequencies."
+        )
 
         if st.session_state.kpi_source is not None:
-            st.caption(f"KPI source: {st.session_state.kpi_source}")
+            source_tone = "success" if st.session_state.kpi_source == "API" else "warning"
+            badge("KPI source", st.session_state.kpi_source, tone=source_tone)
 
         level_agg = [lvl for lvl in ["Category", "Style", "SKU"] if lvl in df_kpi.columns]
         if not level_agg:
@@ -929,15 +1007,14 @@ elif page == "Charts":
                 }
             }
 
-            c1, c2, c3, c4 = st.columns(4)
-            with c1:
+            k1, k2, k3, k4 = st.columns(4)
+            with k1:
                 select_level = st.selectbox("Level", level_agg, key="kpi_level")
-            with c2:
+            with k2:
                 select_freq = st.selectbox("Frequency", freq_list, key="kpi_freq")
 
-            # Top/Bottom filter is available only for Style and SKU.
             if select_level in ["Style", "SKU"]:
-                with c3:
+                with k3:
                     select_rank = st.selectbox(
                         "Quantity filter",
                         ["Highest", "Smallest"],
@@ -945,7 +1022,7 @@ elif page == "Charts":
                     )
             else:
                 select_rank = "Highest"
-                with c3:
+                with k3:
                     st.selectbox(
                         "Quantity filter",
                         ["Highest"],
@@ -959,7 +1036,7 @@ elif page == "Charts":
                 if colname in df_kpi.columns:
                     available_kpi.append(kpi_label)
 
-            with c4:
+            with k4:
                 if available_kpi:
                     select_kpi = st.selectbox("KPI", available_kpi, key="kpi_metric")
                 else:
@@ -990,12 +1067,14 @@ elif page == "Charts":
                         col_top, col_bottom = st.columns(2)
 
                         with col_top:
-                            st.markdown("#### Top 5 quantities")
-                            st.dataframe(top_5, use_container_width=True)
+                            with st.container(border=True):
+                                st.markdown("**Top 5 quantities**")
+                                st.dataframe(top_5, use_container_width=True)
 
                         with col_bottom:
-                            st.markdown("#### Bottom 5 quantities")
-                            st.dataframe(bottom_5, use_container_width=True)
+                            with st.container(border=True):
+                                st.markdown("**Bottom 5 quantities**")
+                                st.dataframe(bottom_5, use_container_width=True)
 
                     if metric_col not in df_plot.columns:
                         raise ValueError(
@@ -1011,6 +1090,9 @@ elif page == "Charts":
                     )
 
                     st.plotly_chart(fig, use_container_width=True)
+
+                    with st.expander("View KPI plotting data"):
+                        st.dataframe(df_plot, use_container_width=True)
 
                 except Exception as e:
                     st.error(f"KPI error: {e}")
