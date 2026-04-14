@@ -124,7 +124,7 @@ API_URL_HEALTH = "http://127.0.0.1:8000/api/health"
 
 BASE_DIR = Path(__file__).resolve().parents[2]
 LOCAL_PREDICTION_CSV_PATH = BASE_DIR / "st_demo" / "predictions_globales.csv"
-LOCAL_KPI_CSV_PATH = BASE_DIR / "st_demo" / "kpi_3_last_month_quantity_Daily.csv"
+LOCAL_KPI_CSV_PATH = BASE_DIR / "st_demo" / "kpi_demo.csv"
 
 # ============================================================
 # SESSION STATE

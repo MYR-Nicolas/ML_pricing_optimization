@@ -439,10 +439,6 @@ metric_row([
     {"label": "CV_RMSE Evolution", "value": format_pct(cv_rmse_improvement), "help": "Percentage change vs baseline"},
 ])
 
-st.markdown("#### Quick comparison")
-badge("CV_MAE", format_pct(cv_mae_improvement), positive=cv_mae_improvement > 0)
-badge("TEST_MAE", format_pct(test_mae_improvement), positive=test_mae_improvement > 0)
-badge("CV_RMSE", format_pct(cv_rmse_improvement), positive=cv_rmse_improvement > 0)
 
 text_box(
     "Evolution insight",
