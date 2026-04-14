@@ -185,7 +185,7 @@ def get_generalization_label(cv_mae: float, test_mae: float, tolerance: float = 
 
 def show_visual(asset: Path, height: int = 420) -> None:
     if asset.exists():
-        st.image(str(asset), use_container_width=True)
+        st.image(str(asset), width="stretch")
     else:
         st.info(f"Graphic placeholder — missing file: {asset}")
 

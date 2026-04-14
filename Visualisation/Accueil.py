@@ -196,7 +196,7 @@ else:
     c1, c2, c3 = st.columns([1.2, 2.2, 1.2])
 
     with c1:
-        if st.button("⬅️ Previous", use_container_width=True):
+        if st.button("⬅️ Previous", width="stretch"):
             st.session_state.slide_idx = (st.session_state.slide_idx - 1) % n
 
     with c2:
@@ -205,7 +205,7 @@ else:
             st.markdown(f"**{current_label}**")
 
     with c3:
-        if st.button("Next ➡️", use_container_width=True):
+        if st.button("Next ➡️", width="stretch"):
             st.session_state.slide_idx = (st.session_state.slide_idx + 1) % n
 
     st.markdown('<div class="slide-frame">', unsafe_allow_html=True)
@@ -213,7 +213,7 @@ else:
 
     with col_center:
         current_slide = slides[st.session_state.slide_idx]
-        st.image(str(current_slide), use_container_width=True)
+        st.image(str(current_slide), width="stretch")
         st.caption(f"File: {current_slide.name}")
 
     st.markdown("</div>", unsafe_allow_html=True)

@@ -765,7 +765,7 @@ if page == "Upload":
 
             with st.container(border=True):
                 st.markdown("**Preview of uploaded data**")
-                st.dataframe(df.head(), use_container_width=True)
+                st.dataframe(df.head(), width="stretch")
 
             with st.expander("View column names"):
                 st.write(df.columns.tolist())
@@ -810,7 +810,7 @@ The dashboard can therefore use:
     c1, c2, c3 = st.columns(3)
 
     with c1:
-        if st.button("Check API", use_container_width=True):
+        if st.button("Check API", width="stretch"):
             api_ok, msg = check_api_health(API_URL_HEALTH)
             st.session_state.api_available = api_ok
             if api_ok:
@@ -821,7 +821,7 @@ The dashboard can therefore use:
                 )
 
     with c2:
-        if st.button("Generate Forecasts", use_container_width=True):
+        if st.button("Generate Forecasts", width="stretch"):
             try:
                 df_pred, source = get_prediction_data(df_hist)
                 st.session_state.df_pred = df_pred
@@ -836,7 +836,7 @@ The dashboard can therefore use:
                 st.error(f"Forecast error: {e}")
 
     with c3:
-        if st.button("Compute Historical KPI", use_container_width=True):
+        if st.button("Compute Historical KPI", width="stretch"):
             try:
                 df_kpi, source = get_kpi_data(df_hist)
                 st.session_state.df_kpi = df_kpi
@@ -946,14 +946,14 @@ The dashboard can therefore use:
                 selected_level=selected_level,
                 selected_entity=selected_entity
             )
-            st.plotly_chart(fig_forecast, use_container_width=True)
+            st.plotly_chart(fig_forecast, width="stretch")
 
             with st.expander("View aggregated forecast data"):
                 pred_view = pred_daily[
                     (pred_daily["level"] == selected_level) &
                     (pred_daily["entity"].astype(str) == str(selected_entity))
                 ].copy()
-                st.dataframe(pred_view, use_container_width=True)
+                st.dataframe(pred_view, width="stretch")
 
         except Exception as e:
             st.error(f"Forecast visualization error: {e}")
@@ -1069,12 +1069,12 @@ The dashboard can therefore use:
                         with col_top:
                             with st.container(border=True):
                                 st.markdown("**Top 5 quantities**")
-                                st.dataframe(top_5, use_container_width=True)
+                                st.dataframe(top_5, width="stretch")
 
                         with col_bottom:
                             with st.container(border=True):
                                 st.markdown("**Bottom 5 quantities**")
-                                st.dataframe(bottom_5, use_container_width=True)
+                                st.dataframe(bottom_5, width="stretch")
 
                     if metric_col not in df_plot.columns:
                         raise ValueError(
@@ -1089,10 +1089,8 @@ The dashboard can therefore use:
                         title=f"{select_rank} 5 {select_level} - {select_kpi} ({select_freq})"
                     )
 
-                    st.plotly_chart(fig, use_container_width=True)
+                    st.plotly_chart(fig, width="stretch")
 
-                    with st.expander("View KPI plotting data"):
-                        st.dataframe(df_plot, use_container_width=True)
 
                 except Exception as e:
                     st.error(f"KPI error: {e}")
